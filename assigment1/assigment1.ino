@@ -3,7 +3,6 @@
 #include <EnableInterrupt.h>
 
 int Ls = 6; //red led's pin (PWM)
-//int T1 = 2; //Button1's pin
 byte ButtonPin[] = {2, 3, 4, 5};
 byte ledPin[] = {8, 9, 10, 11}; //L1,L2, L3, L4
 int pot = A0; //potenziometro
@@ -18,13 +17,14 @@ unsigned long tempoTrascorso;
 int brightness = 0; 
 int fadeAmount = 5; 
 
-int tempoturno;
+int tempoTurno;
 int time1;
 int time2 = 1500;
 int timer = 0;
-int PlayState = 0;
+int playState = 0;
 int score;
 int difficulty;
+int diffPrev;
 int p;
 float f;
 int winner = 0;
@@ -44,8 +44,12 @@ void SleepMode(){
 void ReadDifficulty(){
     pot = analogRead(A0);
   difficulty = map(pot,1, 1023, 1, 8);
-  Serial.print("Difficulty: ");
-  Serial.println(difficulty);
+  if(diffPrev!=difficulty){
+      Serial.print("Difficulty: ");
+      Serial.println(difficulty);
+      diffPrev = difficulty;
+  }
+  
 }
 
 void setup() {
@@ -82,9 +86,9 @@ void loop() {
   }
   int T1State = digitalRead(ButtonPin[0]);
   if(T1State == HIGH){
-    PlayState = 1;
+    playState = 1;
   }
-  if(PlayState == 1){
+  if(playState == 1){
     if(c == 0){
       score = 0;
       Serial.println("GO");
@@ -114,7 +118,6 @@ void loop() {
         //time2 = time2 - (difficulty* 35);
         f = 1-(0.05*difficulty);
         time2 = time2 * f;
-        Serial.println(time2);
         winner = 1;
         Serial.print("score: ");
         Serial.println(score);
@@ -123,13 +126,15 @@ void loop() {
     }
      digitalWrite(ledPin[p], LOW);
      if(winner == 0){
-        Serial.print("score: ");
+        Serial.println("GAME OVER"); 
+        Serial.print("Il tuo score era: ");
         Serial.println(score);
-        Serial.println("GAME OVER");  
-        PlayState = 0;  
+         
+        playState = 0;  
         score = 0;
         S = 100;
-        time2 = 1500;    
+        time2 = 1500; 
+        c = 0;   
      }
   }
   else{
